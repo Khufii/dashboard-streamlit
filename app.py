@@ -224,6 +224,16 @@ section.main .stMarkdown *{
   opacity: 1 !important;
 }
 
+/* Saat user blok/seleksi teks */
+::selection{
+  background: rgba(242,125,32,0.35);  /* oranye muda */
+  color: #0f172a;                     /* teks tetap gelap */
+}
+::-moz-selection{
+  background: rgba(242,125,32,0.35);
+  color: #0f172a;
+}
+
 /* Hide footer */
 footer {visibility: hidden;}
 </style>
