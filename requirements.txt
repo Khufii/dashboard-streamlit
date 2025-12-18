@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+matplotlib
+openpyxl
+ruptures
+scipy
+scikit-posthocs
