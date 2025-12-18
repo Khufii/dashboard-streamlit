@@ -1,6 +1,6 @@
 # ============================================================
 #  STREAMLIT DASHBOARD - ANALISIS KINERJA KONSELOR MEDIS
-#  Versi UI lebih rapi + Streamlit Cloud friendly (tanpa login)
+#  UI lebih rapi + pie label jelas + sidebar compact
 # ============================================================
 
 from __future__ import annotations
@@ -26,159 +26,195 @@ st.set_page_config(
     layout="wide",
 )
 
+# Matplotlib sedikit diperkecil biar rapi
+plt.rcParams.update({
+    "font.size": 10,
+    "axes.titlesize": 11,
+    "axes.labelsize": 10,
+})
+
 
 # ---------------------------
-# UI THEME (lebih modern)
+# CSS (soft + readable + compact)
 # ---------------------------
 st.markdown(
-    """
+    r"""
 <style>
 :root{
-  --bgA: #f8fafc;
-  --bgB: #e2e8f0;
-  --card: rgba(255,255,255,0.82);
+  --bg: #eef2f7;
+  --panel: rgba(255,255,255,0.92);
+  --panel2: rgba(255,255,255,0.82);
   --text: #0f172a;
   --muted: #475569;
+  --border: rgba(15, 23, 42, 0.10);
+  --shadow: 0 10px 26px rgba(2,6,23,0.08);
   --primary: #2563eb;
-  --accent: #f97316;
-  --border: rgba(15, 23, 42, 0.12);
-  --shadow: 0 12px 34px rgba(2,6,23,0.10);
+  --primary2: rgba(37,99,235,0.14);
+  --accent: #f59e0b;
 }
 
-/* background app */
+/* Background app */
 [data-testid="stAppViewContainer"]{
-  background: radial-gradient(circle at 12% 10%, var(--bgA) 0%, var(--bgB) 45%, #dbeafe 100%);
+  background: linear-gradient(180deg, #f6f8fc 0%, var(--bg) 100%);
 }
 
-/* sidebar */
-[data-testid="stSidebar"]{
-  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+/* Pastikan teks main selalu gelap (biar tidak “hilang”) */
+section.main, section.main *{
+  color: var(--text);
 }
-[data-testid="stSidebar"] * { color: #e5e7eb !important; }
-[data-testid="stSidebar"] a { color: #93c5fd !important; }
 
-/* main container width & padding */
+/* container */
 div.block-container{
-  padding-top: 1.1rem;
-  padding-bottom: 2.2rem;
+  padding-top: 1.0rem;
+  padding-bottom: 2.0rem;
   max-width: 1400px;
 }
 
-/* HERO HEADER */
+/* HERO */
 .hero{
-  background: linear-gradient(90deg, rgba(37,99,235,0.16) 0%, rgba(249,115,22,0.14) 100%);
+  background: linear-gradient(90deg, rgba(37,99,235,0.10) 0%, rgba(245,158,11,0.10) 100%);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  border-radius: 22px;
-  padding: 1.15rem 1.35rem;
-  margin-bottom: 1rem;
+  border-radius: 18px;
+  padding: 1.0rem 1.15rem;
+  margin-bottom: 0.9rem;
 }
 .hero-title{
-  font-size: 2.1rem;
-  font-weight: 900;
-  color: var(--text);
+  font-size: 1.55rem;
+  font-weight: 950;
   letter-spacing: -0.02em;
-  line-height: 1.15;
   margin: 0;
 }
 .hero-sub{
-  margin-top: 0.35rem;
-  color: var(--muted);
-  font-size: 1.02rem;
+  margin-top: 0.28rem;
+  color: var(--muted) !important;
+  font-size: 0.92rem;
 }
+
+/* chips/badges */
 .badges{
   display:flex;
   flex-wrap:wrap;
-  gap:0.55rem;
-  margin-top: 0.75rem;
+  gap:0.45rem;
+  margin-top: 0.65rem;
 }
 .badge{
+  background: rgba(255,255,255,0.70);
+  border: 1px solid var(--border);
+  color: var(--text) !important;
+  padding: 0.25rem 0.60rem;
+  border-radius: 999px;
+  font-weight: 850;
+  font-size: 0.82rem;
+}
+.badge.primary{
   background: rgba(37,99,235,0.12);
   border: 1px solid rgba(37,99,235,0.25);
-  color: #1e40af;
-  padding: 0.34rem 0.75rem;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 0.85rem;
-}
-.badge.orange{
-  background: rgba(249,115,22,0.12);
-  border: 1px solid rgba(249,115,22,0.25);
-  color: #9a3412;
+  color: #1e40af !important;
 }
 
 /* KPI cards */
 .metric-card{
-  background: var(--card);
+  background: var(--panel);
   border: 1px solid var(--border);
-  box-shadow: 0 10px 26px rgba(2,6,23,0.07);
+  box-shadow: 0 8px 18px rgba(2,6,23,0.07);
   border-radius: 16px;
-  padding: 0.95rem 1rem;
+  padding: 0.85rem 0.9rem;
 }
 .metric-label{
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
+  color: var(--muted) !important;
+  font-size: 0.82rem;
+  font-weight: 900;
+  margin-bottom: 0.2rem;
 }
 .metric-value{
-  color: var(--text);
-  font-size: 1.75rem;
+  color: var(--text) !important;
+  font-size: 1.45rem;
   font-weight: 950;
   letter-spacing:-0.02em;
 }
 .metric-foot{
-  color: rgba(71,85,105,0.85);
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
+  color: rgba(71,85,105,0.92) !important;
+  font-size: 0.78rem;
+  margin-top: 0.18rem;
 }
 
 /* Section chip */
 .section-chip{
   display:inline-block;
-  padding: 0.35rem 0.75rem;
+  padding: 0.25rem 0.70rem;
   border-radius: 999px;
-  background: rgba(15,23,42,0.06);
+  background: rgba(15,23,42,0.05);
   border: 1px solid rgba(15,23,42,0.10);
-  font-weight: 900;
-  color: var(--text);
-  margin: 0.2rem 0 0.85rem 0;
+  font-weight: 950;
+  margin: 0.15rem 0 0.75rem 0;
 }
 
 /* Card block */
 .card{
-  background: var(--card);
+  background: var(--panel2);
   border: 1px solid var(--border);
-  box-shadow: 0 10px 26px rgba(2,6,23,0.06);
-  border-radius: 18px;
-  padding: 0.9rem 1.0rem 0.65rem 1.0rem;
-  margin-bottom: 1rem;
+  box-shadow: 0 8px 18px rgba(2,6,23,0.06);
+  border-radius: 16px;
+  padding: 0.85rem 0.95rem 0.55rem 0.95rem;
+  margin-bottom: 0.9rem;
 }
 .card h3{
-  margin: 0 0 0.65rem 0;
-  color: var(--text);
+  margin: 0 0 0.55rem 0;
+  color: var(--text) !important;
+  font-size: 1.05rem;
 }
 .small-note{
-  color: var(--muted);
-  font-size: 0.9rem;
+  color: var(--muted) !important;
+  font-size: 0.85rem;
 }
 
-/* Tabs */
+/* Tabs (biar teks selalu kelihatan) */
 div[data-testid="stTabs"] button{
   border-radius: 999px !important;
-  padding: 0.35rem 0.95rem !important;
+  padding: 0.22rem 0.70rem !important;
+  font-weight: 900 !important;
+  background: rgba(255,255,255,0.75) !important;
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  color: var(--text) !important;
+}
+div[data-testid="stTabs"] button p{
+  color: inherit !important;
+  font-size: 0.92rem !important;
   font-weight: 900 !important;
 }
 div[data-testid="stTabs"] button[aria-selected="true"]{
-  background: rgba(37,99,235,0.14) !important;
-  border: 1px solid rgba(37,99,235,0.25) !important;
+  background: var(--primary2) !important;
+  border: 1px solid rgba(37,99,235,0.28) !important;
+  color: #1e40af !important;
 }
 
-/* Round inputs a bit */
-div[data-testid="stFileUploader"] section { border-radius: 16px !important; }
-div[data-testid="stTextInput"] input { border-radius: 14px !important; }
+/* Sidebar: tetap rapi tapi tidak terlalu kontras */
+[data-testid="stSidebar"]{
+  background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+}
+[data-testid="stSidebar"] *{
+  color: #e5e7eb !important;
+}
 
-/* Dataframe container */
+/* Sidebar compact */
+html, body, [data-testid="stAppViewContainer"]{
+  font-size: 14px;
+}
+[data-testid="stSidebar"][aria-expanded="true"]{
+  min-width: 270px !important;
+  max-width: 270px !important;
+}
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stMarkdown{
+  font-size: 0.86rem !important;
+}
+[data-testid="stSidebar"] input,
+[data-testid="stSidebar"] textarea{
+  font-size: 0.90rem !important;
+}
+
+/* Dataframe */
 div[data-testid="stDataFrame"]{
   background: rgba(255,255,255,0.60);
   border-radius: 14px;
@@ -186,7 +222,7 @@ div[data-testid="stDataFrame"]{
   border: 1px solid rgba(15,23,42,0.10);
 }
 
-/* Hide Streamlit footer */
+/* Hide footer */
 footer {visibility: hidden;}
 </style>
 """,
@@ -237,6 +273,20 @@ def prettify_ax(ax):
     ax.grid(axis="y", alpha=0.25)
 
 
+def style_pie_autotexts(autotexts):
+    """Biar angka pie chart kelihatan jelas (kontras aman)."""
+    for t in autotexts:
+        t.set_color("#0f172a")
+        t.set_fontweight("bold")
+        t.set_fontsize(10)
+        t.set_bbox(dict(
+            facecolor="white",
+            edgecolor="none",
+            alpha=0.78,
+            boxstyle="round,pad=0.25"
+        ))
+
+
 @st.cache_data(show_spinner=False)
 def load_excel(file_bytes: bytes) -> pd.DataFrame:
     return pd.read_excel(BytesIO(file_bytes))
@@ -247,22 +297,24 @@ def load_excel(file_bytes: bytes) -> pd.DataFrame:
 # ---------------------------
 safe_sidebar_image("logo_siapbahagia.jpg")
 
-st.sidebar.markdown("## ⚙️ Kontrol Dashboard")
-st.sidebar.caption("Upload data → atur filter → lihat tab analisis.")
+st.sidebar.markdown("## ⚙️ Filter & Kontrol")
+st.sidebar.caption("Upload Excel → atur filter → lihat tab analisis.")
 
 uploaded = st.sidebar.file_uploader("📥 Upload File Excel", type=["xlsx"])
 
-with st.sidebar.expander("ℹ️ Catatan format data", expanded=False):
+with st.sidebar.expander("ℹ️ Format kolom (minimal)", expanded=False):
     st.write(
         """
-Kolom penting yang dipakai dashboard:
-- **Tanggal Pertanyaan** (tanggal/waktu)
-- **Konselor**
-- **Jadwal Seharusnya**
-- **Hari Pertanyaan**
-- **Waktu Respon**
-- **Flag Sesuai**, **Flag Tidak Sesuai**, **Flag Tidak Terjawab**
-(Opsional) **Jam Pertanyaan**
+Kolom wajib:
+- Tanggal Pertanyaan
+- Konselor
+- Jadwal Seharusnya
+- Hari Pertanyaan
+- Waktu Respon
+- Flag Sesuai
+- Flag Tidak Sesuai
+- Flag Tidak Terjawab
+(opsional) Jam Pertanyaan
         """.strip()
     )
 
@@ -270,13 +322,14 @@ if uploaded is None:
     st.markdown(
         """
 <div class="hero">
-  <div class="hero-title">Evaluasi Kinerja Konselor Medis</div>
+  <div class="hero-title">EVALUASI KINERJA KONSELOR MEDIS • SIAP BAHAGIA</div>
   <div class="hero-sub">Silakan upload file Excel dari sidebar untuk mulai analisis.</div>
   <div class="badges">
-    <div class="badge">People Analytics</div>
-    <div class="badge orange">Time Series</div>
+    <div class="badge primary">Dashboard Global</div>
+    <div class="badge">Dashboard Personal</div>
+    <div class="badge">Time Series Mingguan</div>
     <div class="badge">Change Point</div>
-    <div class="badge orange">Statistik Nonparametrik</div>
+    <div class="badge">Kruskal–Wallis + Dunn</div>
   </div>
 </div>
 """,
@@ -287,7 +340,7 @@ if uploaded is None:
 
 
 # ---------------------------
-# LOAD & CLEAN DATA
+# LOAD & VALIDATE DATA
 # ---------------------------
 df = load_excel(uploaded.getvalue())
 
@@ -338,9 +391,8 @@ if "Jam Pertanyaan" in df.columns:
 else:
     df["Jam"] = df.index.hour
 
-
 # ---------------------------
-# HEADER (lebih rapi)
+# HEADER
 # ---------------------------
 min_date = df.index.min().date() if len(df) else "-"
 max_date = df.index.max().date() if len(df) else "-"
@@ -351,10 +403,10 @@ st.markdown(
   <div class="hero-title">EVALUASI KINERJA KONSELOR MEDIS • SIAP BAHAGIA</div>
   <div class="hero-sub">Rentang data: <b>{min_date}</b> s/d <b>{max_date}</b> • Total baris: <b>{len(df):,}</b></div>
   <div class="badges">
-    <div class="badge">Dashboard Global</div>
-    <div class="badge orange">Dashboard Personal</div>
+    <div class="badge primary">Dashboard Global</div>
+    <div class="badge">Dashboard Personal</div>
     <div class="badge">Time Series Mingguan</div>
-    <div class="badge orange">Change Point</div>
+    <div class="badge">Change Point</div>
     <div class="badge">Uji Kruskal–Wallis + Dunn</div>
   </div>
 </div>
@@ -362,9 +414,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 # ---------------------------
-# FILTER GLOBAL (Sidebar)
+# FILTER GLOBAL
 # ---------------------------
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🌍 Filter Global")
@@ -388,25 +439,24 @@ df_global = df[df["Bulan Respon"].isin(bulan_global) & df["Tahun"].isin(tahun_gl
 if konselor_global != "Semua Konselor":
     df_global = df_global[df_global["Konselor"] == konselor_global]
 
-
 # ---------------------------
-# FILTER PERSONAL (Sidebar)
+# FILTER PERSONAL
 # ---------------------------
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 👤 Filter Personal")
 
 jadwal_list = sorted(df["Jadwal Seharusnya"].unique())
-konselor_jadwal = st.sidebar.selectbox("Pilih Konselor (Jadwal Seharusnya)", jadwal_list)
+konselor_jadwal = st.sidebar.selectbox("Konselor (Jadwal Seharusnya)", jadwal_list)
 
 bulan_personal = st.sidebar.multiselect(
-    "Pilih Bulan (Personal)",
+    "Bulan (Personal)",
     options=bulan_available,
     default=bulan_available,
 )
 
-# Export kecil (opsional)
+# Download data global terfilter
 st.sidebar.markdown("---")
-with st.sidebar.expander("⬇️ Export (opsional)", expanded=False):
+with st.sidebar.expander("⬇️ Export", expanded=False):
     st.download_button(
         "Download data global terfilter (CSV)",
         data=df_global.to_csv(index=True).encode("utf-8"),
@@ -417,13 +467,12 @@ with st.sidebar.expander("⬇️ Export (opsional)", expanded=False):
 
 
 # ---------------------------
-# KPI GLOBAL (lebih cantik)
+# KPI GLOBAL
 # ---------------------------
 total_q_global = int(len(df_global))
 total_res_global = int((df_global["Flag Tidak Terjawab"] == 0).sum())
 total_not_global = int((df_global["Flag Tidak Terjawab"] == 1).sum())
 total_sesuai_global = int((df_global["Flag Sesuai"] == 1).sum())
-
 resp_rate = (total_res_global / total_q_global * 100) if total_q_global else 0.0
 
 c1, c2, c3, c4 = st.columns(4)
@@ -460,7 +509,7 @@ with tab_global:
 
     colA, colB = st.columns(2)
 
-    # -------- BAR HARI --------
+    # ---- Bar Hari
     with colA:
         st.markdown("<div class='card'><h3>Pertanyaan dan Jawaban per Hari</h3>", unsafe_allow_html=True)
 
@@ -472,9 +521,6 @@ with tab_global:
         )
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.patch.set_alpha(0)
-        ax.set_facecolor("none")
-
         x = np.arange(len(order))
         width = 0.38
 
@@ -495,18 +541,16 @@ with tab_global:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # -------- BAR JAM --------
+    # ---- Bar Jam
     with colB:
         st.markdown("<div class='card'><h3>Distribusi Jam Pertanyaan</h3>", unsafe_allow_html=True)
 
         jam_count = df_global.groupby("Jam").size().sort_index()
 
         fig2, ax2 = plt.subplots(figsize=(7, 4))
-        fig2.patch.set_alpha(0)
-        ax2.set_facecolor("none")
-
         bars = ax2.bar(jam_count.index.astype(int).astype(str), jam_count.values)
         add_bar_labels(ax2, bars)
+
         ax2.set_xlabel("Jam")
         ax2.set_ylabel("Jumlah Pertanyaan")
         prettify_ax(ax2)
@@ -519,7 +563,7 @@ with tab_global:
 
     colC, colD = st.columns(2)
 
-    # -------- PIE WAKTU RESPON --------
+    # ---- Pie Waktu Respon
     with colC:
         st.markdown("<div class='card'><h3>Rata-rata Waktu Respon per Konselor</h3>", unsafe_allow_html=True)
 
@@ -531,16 +575,15 @@ with tab_global:
         else:
             mean_resp = df_resp.groupby("Konselor")["Waktu Respon"].mean().sort_values(ascending=False)
 
-            fig3, ax3 = plt.subplots(figsize=(7, 6.8))
-            fig3.patch.set_alpha(0)
-            ax3.set_facecolor("none")
-
-            wedges, _, _ = ax3.pie(
+            fig3, ax3 = plt.subplots(figsize=(7, 6.3))
+            wedges, texts, autotexts = ax3.pie(
                 mean_resp.values,
                 autopct="%1.1f%%",
                 startangle=90,
+                pctdistance=0.72,
                 wedgeprops={"linewidth": 1, "edgecolor": "white"},
             )
+            style_pie_autotexts(autotexts)
             ax3.axis("equal")
 
             ax3.legend(
@@ -554,7 +597,7 @@ with tab_global:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # -------- PIE STATUS --------
+    # ---- Pie Status
     with colD:
         st.markdown("<div class='card'><h3>Proporsi Sesuai / Tidak Sesuai / Tidak Terjawab</h3>", unsafe_allow_html=True)
 
@@ -565,17 +608,17 @@ with tab_global:
         ]
         labels = ["Sesuai", "Tidak Sesuai", "Tidak Terjawab"]
 
-        fig4, ax4 = plt.subplots(figsize=(7, 6.8))
-        fig4.patch.set_alpha(0)
-        ax4.set_facecolor("none")
-
-        wedges, _, _ = ax4.pie(
+        fig4, ax4 = plt.subplots(figsize=(7, 6.3))
+        wedges, texts, autotexts = ax4.pie(
             values,
             autopct="%1.0f%%",
             startangle=90,
+            pctdistance=0.72,
             wedgeprops={"linewidth": 1, "edgecolor": "white"},
         )
+        style_pie_autotexts(autotexts)
         ax4.axis("equal")
+
         ax4.legend(
             wedges, labels,
             loc="upper center", bbox_to_anchor=(0.5, -0.05),
@@ -587,29 +630,25 @@ with tab_global:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ============================================================
-    # ANALISIS BEBAN KERJA
-    # ============================================================
+    # ---- Workload
     st.markdown("<div class='section-chip'>👥 Analisis Beban Kerja Konselor</div>", unsafe_allow_html=True)
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
 
     df_work = df_global[df_global["Konselor"] != "Tidak Terjawab"]
     workload = df_work.groupby("Konselor").size().sort_values(ascending=False)
 
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
     if workload.empty:
         st.warning("Tidak ada data workload pada filter ini.")
     else:
-        fig_wl, ax_wl = plt.subplots(figsize=(9, 4.3))
-        fig_wl.patch.set_alpha(0)
-        ax_wl.set_facecolor("none")
+        fig_wl, ax_wl = plt.subplots(figsize=(9, 4.2))
 
         workload_sorted = workload.sort_values()
         bars = ax_wl.barh(workload_sorted.index, workload_sorted.values)
 
+        offset = max(1, int(workload_sorted.values.max() * 0.02))
         for bar in bars:
             ax_wl.text(
-                bar.get_width() + max(1, workload_sorted.values.max() * 0.01),
+                bar.get_width() + offset,
                 bar.get_y() + bar.get_height()/2,
                 f"{int(bar.get_width())}",
                 va="center",
@@ -626,11 +665,8 @@ with tab_global:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ============================================================
-    # ANALISIS PRODUKTIVITAS
-    # ============================================================
+    # ---- Produktivitas
     st.markdown("<div class='section-chip'>⚙️ Analisis Produktivitas Konselor</div>", unsafe_allow_html=True)
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
     df_prod = df_global[
@@ -650,77 +686,25 @@ with tab_global:
             .round(2)
             .sort_values("Jumlah_Respon", ascending=False)
         )
-
         st.dataframe(produktivitas, use_container_width=True)
-
-        st.caption(
-            "Produktivitas diukur dari jumlah respon dan kecepatan respon. "
-            "Respon tinggi + waktu respon rendah → performa lebih optimal."
-        )
+        st.caption("Respon tinggi + waktu respon rendah → performa lebih optimal.")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ============================================================
-    # TIME SERIES
-    # ============================================================
+    # ---- Time Series
     st.markdown("<div class='section-chip'>📈 Tren Pertanyaan Mingguan</div>", unsafe_allow_html=True)
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
     weekly = df_global.resample("W").size()
-
     if weekly.empty:
         st.warning("Tidak ada data mingguan pada filter ini.")
     else:
         fig_ts, ax_ts = plt.subplots(figsize=(14, 4))
-        fig_ts.patch.set_alpha(0)
-        ax_ts.set_facecolor("none")
-
         ax_ts.plot(weekly.index, weekly.values, marker="o", linewidth=2)
         ax_ts.set_ylabel("Jumlah Pertanyaan")
         prettify_ax(ax_ts)
-
         st.pyplot(fig_ts, use_container_width=True)
         plt.close(fig_ts)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # ============================================================
-    # CHANGE POINT (ringkas)
-    # ============================================================
-    st.markdown("<div class='section-chip'>🔍 Change Point Detection (Mingguan)</div>", unsafe_allow_html=True)
-
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-    weekly_counts = df_global.resample("W").size()
-    signal = weekly_counts.fillna(0).values
-    n = len(signal)
-
-    if n < 6:
-        st.warning("Data mingguan tidak cukup untuk deteksi change point.")
-    else:
-        penalty = np.log(n) * np.var(signal)
-
-        algo = rpt.Pelt(model="l2", min_size=4).fit(signal)
-        cp = algo.predict(pen=penalty)
-
-        fig_cp, ax_cp = plt.subplots(figsize=(14, 4))
-        fig_cp.patch.set_alpha(0)
-        ax_cp.set_facecolor("none")
-
-        ax_cp.plot(signal, marker="o", linewidth=2, label="Total Pertanyaan Mingguan")
-        for i, c in enumerate(cp[:-1]):
-            ax_cp.axvline(c, color="red", linestyle="--", alpha=0.75,
-                         label="Change Point" if i == 0 else None)
-
-        ax_cp.set_xlabel("Minggu ke- (index)")
-        ax_cp.set_ylabel("Jumlah Pertanyaan")
-        ax_cp.legend()
-        prettify_ax(ax_cp)
-
-        st.caption(f"Penalty otomatis: {penalty:.2f} • Change point index: {cp}")
-        st.pyplot(fig_cp, use_container_width=True)
-        plt.close(fig_cp)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -759,7 +743,6 @@ with tab_personal:
     tidak_sesuai = int((df_personal["Status"] == "Tidak Sesuai").sum())
     tidak_terjawab = int((df_personal["Status"] == "Tidak Terjawab").sum())
     jumlah_respon = sesuai + tidak_sesuai
-
     rr = (jumlah_respon / total_q * 100) if total_q else 0.0
 
     k1, k2, k3, k4 = st.columns(4)
@@ -793,16 +776,16 @@ with tab_personal:
         df_pie["Penjawab"] = df_pie.apply(penjawab_valid, axis=1)
         penjawab_count = df_pie["Penjawab"].value_counts()
 
-        fig1, ax1 = plt.subplots(figsize=(7, 6.2))
-        fig1.patch.set_alpha(0)
-        ax1.set_facecolor("none")
-        ax1.pie(
+        fig1, ax1 = plt.subplots(figsize=(7, 6.0))
+        wedges, texts, autotexts = ax1.pie(
             penjawab_count.values,
             labels=penjawab_count.index,
             autopct=lambda p: f"{int(round(p/100 * penjawab_count.sum()))}",
             startangle=90,
+            pctdistance=0.72,
             wedgeprops={"linewidth": 1, "edgecolor": "white"},
         )
+        style_pie_autotexts(autotexts)
         ax1.axis("equal")
         st.pyplot(fig1, use_container_width=True)
         plt.close(fig1)
@@ -815,16 +798,16 @@ with tab_personal:
         labels2 = ["Sesuai", "Tidak Sesuai", "Tidak Terjawab"]
         values2 = [sesuai, tidak_sesuai, tidak_terjawab]
 
-        fig2, ax2 = plt.subplots(figsize=(7, 6.2))
-        fig2.patch.set_alpha(0)
-        ax2.set_facecolor("none")
-        ax2.pie(
+        fig2, ax2 = plt.subplots(figsize=(7, 6.0))
+        wedges, texts, autotexts = ax2.pie(
             values2,
             labels=labels2,
             autopct=lambda p: f"{int(round(p/100 * sum(values2)))}",
             startangle=90,
+            pctdistance=0.72,
             wedgeprops={"linewidth": 1, "edgecolor": "white"},
         )
+        style_pie_autotexts(autotexts)
         ax2.axis("equal")
         st.pyplot(fig2, use_container_width=True)
         plt.close(fig2)
@@ -837,7 +820,6 @@ with tab_personal:
 # ============================================================
 with tab_ts:
     st.markdown("<div class='section-chip'>Time Series Mingguan</div>", unsafe_allow_html=True)
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
     if df_global.empty:
@@ -845,14 +827,10 @@ with tab_ts:
     else:
         weekly = df_global.resample("W").size()
         fig_ts, ax_ts = plt.subplots(figsize=(12, 4))
-        fig_ts.patch.set_alpha(0)
-        ax_ts.set_facecolor("none")
-
         ax_ts.plot(weekly.index, weekly.values, marker="o", linewidth=2)
         ax_ts.set_title("Total Pertanyaan per Minggu")
         ax_ts.set_ylabel("Jumlah Pertanyaan")
         prettify_ax(ax_ts)
-
         st.pyplot(fig_ts, use_container_width=True)
         plt.close(fig_ts)
 
@@ -864,7 +842,6 @@ with tab_ts:
 # ============================================================
 with tab_cp:
     st.markdown("<div class='section-chip'>Change Point Detection</div>", unsafe_allow_html=True)
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
     if df_global.empty:
@@ -886,15 +863,12 @@ with tab_cp:
             st.write("Index Change Point:", cp)
 
             fig_cp, ax_cp = plt.subplots(figsize=(12, 4))
-            fig_cp.patch.set_alpha(0)
-            ax_cp.set_facecolor("none")
-
             ax_cp.plot(signal, marker="o", label="Total Pertanyaan Mingguan", linewidth=2)
 
             first = True
             for c in cp[:-1]:
                 ax_cp.axvline(c, color="red", linestyle="--",
-                             label="Change Point" if first else None, alpha=0.75)
+                             label="Change Point" if first else None, alpha=0.70)
                 first = False
 
             ax_cp.set_title("Change Point Detection - Total Pertanyaan Mingguan")
@@ -906,6 +880,7 @@ with tab_cp:
             st.pyplot(fig_cp, use_container_width=True)
             plt.close(fig_cp)
 
+            # segmen numerik
             segments = []
             start = 0
             for i, end in enumerate(cp):
@@ -922,7 +897,6 @@ with tab_cp:
                 start = end
 
             df_segments = pd.DataFrame(segments)
-
             st.subheader("Analisis Numerik per Segmen")
             st.dataframe(df_segments, use_container_width=True)
 
@@ -939,7 +913,6 @@ with tab_cp:
 # ============================================================
 with tab_stat:
     st.markdown("<div class='section-chip'>Analisis Statistik</div>", unsafe_allow_html=True)
-
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
     df_k = df_global.dropna(subset=["Waktu Respon"])
