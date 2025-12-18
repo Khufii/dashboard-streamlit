@@ -1,8 +1,5 @@
 # ============================================================
 #  STREAMLIT DASHBOARD - ANALISIS KINERJA KONSELOR MEDIS
-#  Header: judul saja (tanpa rentang data & tanpa menu atas)
-#  Tema: perpaduan oranye (SIAP Bahagia style)
-#  Pie label jelas + Sidebar compact + Cloud ready
 # ============================================================
 
 from __future__ import annotations
@@ -20,10 +17,10 @@ import scikit_posthocs as sp
 
 
 # ---------------------------
-# PAGE CONFIG (harus paling atas)
+# PAGE CONFIG 
 # ---------------------------
 st.set_page_config(
-    page_title="Evaluasi Kinerja Konselor Medis • SIAP BAHAGIA",
+    page_title="Evaluasi Kinerja Konselor Medis SIAP BAHAGIA",
     page_icon="🟠",
     layout="wide",
 )
@@ -35,7 +32,7 @@ plt.rcParams.update({
 })
 
 # ---------------------------
-# CSS THEME (orange-soft + readable + compact)
+# CSS THEME
 # ---------------------------
 st.markdown(
     r"""
