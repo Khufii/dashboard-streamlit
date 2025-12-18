@@ -85,17 +85,27 @@ div.block-container{
   border: 1px solid var(--primaryBorder);
   box-shadow: var(--shadow);
   border-radius: 18px;
-  padding: 0.95rem 1.1rem;
+
+  padding: 1.55rem 1.1rem 1.25rem 1.1rem; /* tambah ruang atas */
   margin-bottom: 0.9rem;
+
+  overflow: visible;                       /* pastikan tidak crop isi */
 }
+
 .hero-title{
   font-size: 1.65rem;
   font-weight: 950;
   letter-spacing: -0.02em;
-  margin: 0;
   text-align: center;
   color: #111827 !important;
+
+  margin: 0;
+  padding-top: 0.25rem;                    /* dorong turun sedikit */
+  line-height: 1.25;                       /* cegah teks kepotong */
+  white-space: normal;                     /* izinkan turun baris */
+  word-break: break-word;
 }
+
 
 /* KPI cards */
 .metric-card{
