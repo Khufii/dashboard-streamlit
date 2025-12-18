@@ -250,6 +250,11 @@ def style_pie_autotexts(autotexts):
             alpha=0.78,
             boxstyle="round,pad=0.25"
         ))
+def autopct_min_pct(min_pct: float = 3.0):
+    """Hanya tampilkan persen jika >= min_pct agar tidak numpuk."""
+    def _fmt(pct):
+        return f"{pct:.1f}%" if pct >= min_pct else ""
+    return _fmt
 
 
 @st.cache_data(show_spinner=False)
@@ -492,22 +497,28 @@ if menu == "Dashboard Global":
                 st.warning("Nilai pie chart tidak valid (semua nol).")
             else:
                 fig3, ax3 = plt.subplots(figsize=(7, 6.0))
-                wedges, texts, autotexts = ax3.pie(
+                 wedges, texts, autotexts = ax3.pie(
                     mean_resp.values,
-                    autopct="%1.1f%%",
+                    labels=None,                      # label jangan di slice (biar bersih)
+                    autopct=autopct_min_pct(3.0),     # persen kecil (<3%) disembunyikan
                     startangle=90,
-                    pctdistance=0.72,
+                    pctdistance=0.68,                 # angka agak masuk ke tengah
                     wedgeprops={"linewidth": 1, "edgecolor": "white"},
                 )
+                
                 style_pie_autotexts(autotexts)
                 ax3.axis("equal")
+                
+                # legend tetap menampilkan semua nama konselor
                 ax3.legend(
                     wedges, mean_resp.index,
                     loc="upper center", bbox_to_anchor=(0.5, -0.05),
                     ncol=2, frameon=False
                 )
+                
                 st.pyplot(fig3, use_container_width=True)
                 plt.close(fig3)
+
 
         st.markdown("</div>", unsafe_allow_html=True)
 
