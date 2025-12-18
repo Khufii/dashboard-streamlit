@@ -187,12 +187,44 @@ div[data-testid="stDataFrame"]{
   border: 1px solid rgba(15,23,42,0.10);
 }
 
+/* Paksa teks alert jadi gelap */
+div[data-testid="stAlert"],
+div[data-testid="stAlert"] *{
+  color: #0f172a !important;
+}
+
+/* Biar box alert soft & rapi */
+div[data-testid="stAlert"]{
+  border-radius: 14px !important;
+  border: 1px solid rgba(15,23,42,0.12) !important;
+  background: rgba(255,255,255,0.72) !important;
+}
+
+/* Warna background per tipe alert (soft) */
+div[data-testid="stAlert"][class*="st-success"]{
+  background: rgba(34,197,94,0.16) !important;
+  border-color: rgba(34,197,94,0.25) !important;
+}
+div[data-testid="stAlert"][class*="st-info"]{
+  background: rgba(59,130,246,0.14) !important;
+  border-color: rgba(59,130,246,0.22) !important;
+}
+div[data-testid="stAlert"][class*="st-warning"]{
+  background: rgba(245,158,11,0.16) !important;
+  border-color: rgba(245,158,11,0.24) !important;
+}
+div[data-testid="stAlert"][class*="st-error"]{
+  background: rgba(239,68,68,0.14) !important;
+  border-color: rgba(239,68,68,0.22) !important;
+}
+
 /* Hide footer */
 footer {visibility: hidden;}
 </style>
 """,
     unsafe_allow_html=True,
 )
+
 
 
 # ---------------------------
