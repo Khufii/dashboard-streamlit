@@ -324,8 +324,8 @@ def load_excel(file_bytes: bytes) -> pd.DataFrame:
 # ---------------------------
 safe_sidebar_image("logo_siapbahagia.jpg")
 
-st.sidebar.markdown("## ⚙️ Kontrol")
-uploaded = st.sidebar.file_uploader("📥 Upload File Excel", type=["xlsx"])
+st.sidebar.markdown("")
+uploaded = st.sidebar.file_uploader("Upload File Excel", type=["xlsx"])
 
 if uploaded is None:
     # Header judul saja
@@ -395,7 +395,7 @@ else:
 
 # Menu pindah halaman di SIDEBAR (menggantikan tulisan di atas)
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 📌 Menu")
+st.sidebar.markdown("### Menu")
 menu = st.sidebar.radio(
     "Pilih Halaman",
     [
@@ -410,7 +410,7 @@ menu = st.sidebar.radio(
 
 # Filter Global
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🌍 Filter Global")
+st.sidebar.markdown("### Filter Global")
 bulan_global = st.sidebar.multiselect("Bulan", options=bulan_available, default=bulan_available)
 tahun_global = st.sidebar.multiselect(
     "Tahun",
@@ -434,7 +434,7 @@ bulan_personal = st.sidebar.multiselect("Bulan (Personal)", options=bulan_availa
 
 # Export
 st.sidebar.markdown("---")
-with st.sidebar.expander("⬇️ Export", expanded=False):
+with st.sidebar.expander("⬇️Export", expanded=False):
     st.download_button(
         "Download data global terfilter (CSV)",
         data=df_global.to_csv(index=True).encode("utf-8"),
