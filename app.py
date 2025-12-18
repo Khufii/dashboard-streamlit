@@ -203,13 +203,33 @@ section.main h1, section.main h2, section.main h3, section.main h4, section.main
   opacity: 1 !important;
 }
 
+/* Paksa teks markdown di MAIN jadi gelap dan tidak pudar */
+section.main div[data-testid="stMarkdownContainer"],
+section.main div[data-testid="stMarkdownContainer"] *{
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+/* Bullet list sering paling kena pudar */
+section.main div[data-testid="stMarkdownContainer"] ul li,
+section.main div[data-testid="stMarkdownContainer"] ol li{
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+/* Kadang Streamlit bungkus markdown pakai class ini */
+section.main .stMarkdown,
+section.main .stMarkdown *{
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
 /* Hide footer */
 footer {visibility: hidden;}
 </style>
 """,
     unsafe_allow_html=True,
 )
-
 
 
 # ---------------------------
