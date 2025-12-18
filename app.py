@@ -1,6 +1,8 @@
 # ============================================================
 #  STREAMLIT DASHBOARD - ANALISIS KINERJA KONSELOR MEDIS
-#  UI lebih rapi + pie label jelas + sidebar compact
+#  Header: judul saja (tanpa rentang data & tanpa menu atas)
+#  Tema: perpaduan oranye (SIAP Bahagia style)
+#  Pie label jelas + Sidebar compact + Cloud ready
 # ============================================================
 
 from __future__ import annotations
@@ -18,47 +20,51 @@ import scikit_posthocs as sp
 
 
 # ---------------------------
-# PAGE CONFIG (harus di atas)
+# PAGE CONFIG (harus paling atas)
 # ---------------------------
 st.set_page_config(
-    page_title="Evaluasi Kinerja Konselor Medis",
-    page_icon="📊",
+    page_title="Evaluasi Kinerja Konselor Medis • SIAP BAHAGIA",
+    page_icon="🟠",
     layout="wide",
 )
 
-# Matplotlib sedikit diperkecil biar rapi
 plt.rcParams.update({
     "font.size": 10,
     "axes.titlesize": 11,
     "axes.labelsize": 10,
 })
 
-
 # ---------------------------
-# CSS (soft + readable + compact)
+# CSS THEME (orange-soft + readable + compact)
 # ---------------------------
 st.markdown(
     r"""
 <style>
 :root{
-  --bg: #eef2f7;
-  --panel: rgba(255,255,255,0.92);
-  --panel2: rgba(255,255,255,0.82);
+  --bg: #f6f8fc;
+  --panel: rgba(255,255,255,0.94);
+  --panel2: rgba(255,255,255,0.86);
   --text: #0f172a;
   --muted: #475569;
   --border: rgba(15, 23, 42, 0.10);
   --shadow: 0 10px 26px rgba(2,6,23,0.08);
-  --primary: #2563eb;
-  --primary2: rgba(37,99,235,0.14);
-  --accent: #f59e0b;
+
+  /* ORANGE SIAP BAHAGIA */
+  --primary: #f27d20;
+  --primary2: rgba(242,125,32,0.16);
+  --primaryBorder: rgba(242,125,32,0.30);
+  --primaryText: #9a3412;
 }
 
-/* Background app */
+/* background app */
 [data-testid="stAppViewContainer"]{
-  background: linear-gradient(180deg, #f6f8fc 0%, var(--bg) 100%);
+  background: radial-gradient(circle at 15% 0%,
+    rgba(242,125,32,0.12) 0%,
+    #f6f8fc 38%,
+    #eef2f7 100%);
 }
 
-/* Pastikan teks main selalu gelap (biar tidak “hilang”) */
+/* teks main selalu gelap */
 section.main, section.main *{
   color: var(--text);
 }
@@ -70,47 +76,25 @@ div.block-container{
   max-width: 1400px;
 }
 
-/* HERO */
+/* HERO (judul saja) */
 .hero{
-  background: linear-gradient(90deg, rgba(37,99,235,0.10) 0%, rgba(245,158,11,0.10) 100%);
-  border: 1px solid var(--border);
+  background: linear-gradient(90deg,
+    rgba(242,125,32,0.20) 0%,
+    rgba(242,125,32,0.12) 55%,
+    rgba(255,255,255,0.60) 100%);
+  border: 1px solid var(--primaryBorder);
   box-shadow: var(--shadow);
   border-radius: 18px;
-  padding: 1.0rem 1.15rem;
+  padding: 0.95rem 1.1rem;
   margin-bottom: 0.9rem;
 }
 .hero-title{
-  font-size: 1.55rem;
+  font-size: 1.65rem;
   font-weight: 950;
   letter-spacing: -0.02em;
   margin: 0;
-}
-.hero-sub{
-  margin-top: 0.28rem;
-  color: var(--muted) !important;
-  font-size: 0.92rem;
-}
-
-/* chips/badges */
-.badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:0.45rem;
-  margin-top: 0.65rem;
-}
-.badge{
-  background: rgba(255,255,255,0.70);
-  border: 1px solid var(--border);
-  color: var(--text) !important;
-  padding: 0.25rem 0.60rem;
-  border-radius: 999px;
-  font-weight: 850;
-  font-size: 0.82rem;
-}
-.badge.primary{
-  background: rgba(37,99,235,0.12);
-  border: 1px solid rgba(37,99,235,0.25);
-  color: #1e40af !important;
+  text-align: center;
+  color: #111827 !important;
 }
 
 /* KPI cards */
@@ -144,8 +128,9 @@ div.block-container{
   display:inline-block;
   padding: 0.25rem 0.70rem;
   border-radius: 999px;
-  background: rgba(15,23,42,0.05);
-  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(242,125,32,0.10);
+  border: 1px solid rgba(242,125,32,0.22);
+  color: var(--primaryText) !important;
   font-weight: 950;
   margin: 0.15rem 0 0.75rem 0;
 }
@@ -169,27 +154,7 @@ div.block-container{
   font-size: 0.85rem;
 }
 
-/* Tabs (biar teks selalu kelihatan) */
-div[data-testid="stTabs"] button{
-  border-radius: 999px !important;
-  padding: 0.22rem 0.70rem !important;
-  font-weight: 900 !important;
-  background: rgba(255,255,255,0.75) !important;
-  border: 1px solid rgba(15,23,42,0.10) !important;
-  color: var(--text) !important;
-}
-div[data-testid="stTabs"] button p{
-  color: inherit !important;
-  font-size: 0.92rem !important;
-  font-weight: 900 !important;
-}
-div[data-testid="stTabs"] button[aria-selected="true"]{
-  background: var(--primary2) !important;
-  border: 1px solid rgba(37,99,235,0.28) !important;
-  color: #1e40af !important;
-}
-
-/* Sidebar: tetap rapi tapi tidak terlalu kontras */
+/* Sidebar */
 [data-testid="stSidebar"]{
   background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
 }
@@ -197,7 +162,7 @@ div[data-testid="stTabs"] button[aria-selected="true"]{
   color: #e5e7eb !important;
 }
 
-/* Sidebar compact */
+/* COMPACT MODE */
 html, body, [data-testid="stAppViewContainer"]{
   font-size: 14px;
 }
@@ -274,7 +239,7 @@ def prettify_ax(ax):
 
 
 def style_pie_autotexts(autotexts):
-    """Biar angka pie chart kelihatan jelas (kontras aman)."""
+    """Angka pie chart terlihat jelas (kontras aman)."""
     for t in autotexts:
         t.set_color("#0f172a")
         t.set_fontweight("bold")
@@ -293,44 +258,19 @@ def load_excel(file_bytes: bytes) -> pd.DataFrame:
 
 
 # ---------------------------
-# SIDEBAR
+# SIDEBAR: Upload + Menu + Filter
 # ---------------------------
 safe_sidebar_image("logo_siapbahagia.jpg")
 
-st.sidebar.markdown("## ⚙️ Filter & Kontrol")
-st.sidebar.caption("Upload Excel → atur filter → lihat tab analisis.")
-
+st.sidebar.markdown("## ⚙️ Kontrol")
 uploaded = st.sidebar.file_uploader("📥 Upload File Excel", type=["xlsx"])
 
-with st.sidebar.expander("ℹ️ Format kolom (minimal)", expanded=False):
-    st.write(
-        """
-Kolom wajib:
-- Tanggal Pertanyaan
-- Konselor
-- Jadwal Seharusnya
-- Hari Pertanyaan
-- Waktu Respon
-- Flag Sesuai
-- Flag Tidak Sesuai
-- Flag Tidak Terjawab
-(opsional) Jam Pertanyaan
-        """.strip()
-    )
-
 if uploaded is None:
+    # Header judul saja
     st.markdown(
         """
 <div class="hero">
   <div class="hero-title">EVALUASI KINERJA KONSELOR MEDIS • SIAP BAHAGIA</div>
-  <div class="hero-sub">Silakan upload file Excel dari sidebar untuk mulai analisis.</div>
-  <div class="badges">
-    <div class="badge primary">Dashboard Global</div>
-    <div class="badge">Dashboard Personal</div>
-    <div class="badge">Time Series Mingguan</div>
-    <div class="badge">Change Point</div>
-    <div class="badge">Kruskal–Wallis + Dunn</div>
-  </div>
 </div>
 """,
         unsafe_allow_html=True,
@@ -338,12 +278,10 @@ if uploaded is None:
     st.info("Silakan upload file Excel terlebih dahulu.")
     st.stop()
 
-
-# ---------------------------
-# LOAD & VALIDATE DATA
-# ---------------------------
+# Load data
 df = load_excel(uploaded.getvalue())
 
+# Validasi kolom wajib
 required_cols = [
     "Tanggal Pertanyaan",
     "Konselor",
@@ -359,22 +297,23 @@ if missing:
     st.error(f"Kolom wajib tidak ditemukan: {missing}")
     st.stop()
 
+# Clean + index tanggal
 df["Tanggal Pertanyaan"] = pd.to_datetime(df["Tanggal Pertanyaan"], errors="coerce")
 df = df.dropna(subset=["Tanggal Pertanyaan"]).copy()
 df = df.set_index("Tanggal Pertanyaan")
 
+# Normalisasi teks
 for col in ["Konselor", "Jadwal Seharusnya", "Hari Pertanyaan", "Hari Jawab"]:
     if col in df.columns:
         df[col] = df[col].astype(str).str.strip()
 
+# Waktu respon numeric
 df["Waktu Respon"] = pd.to_numeric(
     df["Waktu Respon"].replace("-", np.nan),
     errors="coerce",
 )
 
-# ---------------------------
-# BULAN & TAHUN
-# ---------------------------
+# Bulan & Tahun
 month_map = {
     1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
     5: "Mei", 6: "Jun", 7: "Jul", 8: "Agu",
@@ -386,75 +325,52 @@ df["Tahun"] = df.index.year
 bulan_order = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]
 bulan_available = [b for b in bulan_order if b in df["Bulan Respon"].unique()]
 
+# Jam
 if "Jam Pertanyaan" in df.columns:
     df["Jam"] = pd.to_datetime(df["Jam Pertanyaan"].astype(str), errors="coerce").dt.hour
 else:
     df["Jam"] = df.index.hour
 
-# ---------------------------
-# HEADER
-# ---------------------------
-min_date = df.index.min().date() if len(df) else "-"
-max_date = df.index.max().date() if len(df) else "-"
-
-st.markdown(
-    f"""
-<div class="hero">
-  <div class="hero-title">EVALUASI KINERJA KONSELOR MEDIS • SIAP BAHAGIA</div>
-  <div class="hero-sub">Rentang data: <b>{min_date}</b> s/d <b>{max_date}</b> • Total baris: <b>{len(df):,}</b></div>
-  <div class="badges">
-    <div class="badge primary">Dashboard Global</div>
-    <div class="badge">Dashboard Personal</div>
-    <div class="badge">Time Series Mingguan</div>
-    <div class="badge">Change Point</div>
-    <div class="badge">Uji Kruskal–Wallis + Dunn</div>
-  </div>
-</div>
-""",
-    unsafe_allow_html=True,
+# Menu pindah halaman di SIDEBAR (menggantikan tulisan di atas)
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 📌 Menu")
+menu = st.sidebar.radio(
+    "Pilih Halaman",
+    [
+        "Dashboard Global",
+        "Dashboard Personal",
+        "Time Series Mingguan",
+        "Change Point Detection",
+        "Analisis Statistik",
+    ],
+    label_visibility="collapsed",
 )
 
-# ---------------------------
-# FILTER GLOBAL
-# ---------------------------
+# Filter Global
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🌍 Filter Global")
-
-bulan_global = st.sidebar.multiselect(
-    "Pilih Bulan",
-    options=bulan_available,
-    default=bulan_available,
-)
-
+bulan_global = st.sidebar.multiselect("Bulan", options=bulan_available, default=bulan_available)
 tahun_global = st.sidebar.multiselect(
-    "Pilih Tahun",
+    "Tahun",
     options=sorted(df["Tahun"].unique()),
     default=sorted(df["Tahun"].unique()),
 )
 
 konselor_list = ["Semua Konselor"] + sorted(df["Konselor"].unique())
-konselor_global = st.sidebar.selectbox("Filter Konselor Penjawab", konselor_list)
+konselor_global = st.sidebar.selectbox("Konselor Penjawab", konselor_list)
 
 df_global = df[df["Bulan Respon"].isin(bulan_global) & df["Tahun"].isin(tahun_global)]
 if konselor_global != "Semua Konselor":
     df_global = df_global[df_global["Konselor"] == konselor_global]
 
-# ---------------------------
-# FILTER PERSONAL
-# ---------------------------
+# Filter Personal
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 👤 Filter Personal")
-
 jadwal_list = sorted(df["Jadwal Seharusnya"].unique())
-konselor_jadwal = st.sidebar.selectbox("Konselor (Jadwal Seharusnya)", jadwal_list)
+konselor_jadwal = st.sidebar.selectbox("Jadwal Seharusnya", jadwal_list)
+bulan_personal = st.sidebar.multiselect("Bulan (Personal)", options=bulan_available, default=bulan_available)
 
-bulan_personal = st.sidebar.multiselect(
-    "Bulan (Personal)",
-    options=bulan_available,
-    default=bulan_available,
-)
-
-# Download data global terfilter
+# Export
 st.sidebar.markdown("---")
 with st.sidebar.expander("⬇️ Export", expanded=False):
     st.download_button(
@@ -467,7 +383,19 @@ with st.sidebar.expander("⬇️ Export", expanded=False):
 
 
 # ---------------------------
-# KPI GLOBAL
+# HEADER MAIN (judul saja)
+# ---------------------------
+st.markdown(
+    """
+<div class="hero">
+  <div class="hero-title">EVALUASI KINERJA KONSELOR MEDIS • SIAP BAHAGIA</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+# ---------------------------
+# KPI GLOBAL (tetap tampil)
 # ---------------------------
 total_q_global = int(len(df_global))
 total_res_global = int((df_global["Flag Tidak Terjawab"] == 0).sum())
@@ -489,27 +417,15 @@ st.markdown("<div class='small-note'>Tip: gunakan filter di sidebar untuk fokus 
 st.markdown("")
 
 
-# ---------------------------
-# TABS
-# ---------------------------
-tab_global, tab_personal, tab_ts, tab_cp, tab_stat = st.tabs([
-    "📊 Dashboard Global",
-    "👤 Dashboard Personal",
-    "📈 Time Series Mingguan",
-    "🔍 Change Point Detection",
-    "📊 Analisis Statistik",
-])
-
-
 # ============================================================
-# TAB 1 — DASHBOARD GLOBAL
+# HALAMAN: DASHBOARD GLOBAL
 # ============================================================
-with tab_global:
+if menu == "Dashboard Global":
     st.markdown("<div class='section-chip'>Dashboard Global</div>", unsafe_allow_html=True)
 
     colA, colB = st.columns(2)
 
-    # ---- Bar Hari
+    # Bar Hari
     with colA:
         st.markdown("<div class='card'><h3>Pertanyaan dan Jawaban per Hari</h3>", unsafe_allow_html=True)
 
@@ -523,13 +439,11 @@ with tab_global:
         fig, ax = plt.subplots(figsize=(7, 4))
         x = np.arange(len(order))
         width = 0.38
-
         bars1 = ax.bar(x - width/2, pert.values, width, label="Pertanyaan")
         bars2 = ax.bar(x + width/2, jawab.values, width, label="Jawaban")
 
         add_bar_labels(ax, bars1)
         add_bar_labels(ax, bars2)
-
         ax.set_xticks(x)
         ax.set_xticklabels(order, rotation=18, ha="right")
         ax.legend()
@@ -541,16 +455,15 @@ with tab_global:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---- Bar Jam
+    # Bar Jam
     with colB:
         st.markdown("<div class='card'><h3>Distribusi Jam Pertanyaan</h3>", unsafe_allow_html=True)
-
         jam_count = df_global.groupby("Jam").size().sort_index()
 
         fig2, ax2 = plt.subplots(figsize=(7, 4))
-        bars = ax2.bar(jam_count.index.astype(int).astype(str), jam_count.values)
-        add_bar_labels(ax2, bars)
-
+        if len(jam_count) > 0:
+            bars = ax2.bar(jam_count.index.astype(int).astype(str), jam_count.values)
+            add_bar_labels(ax2, bars)
         ax2.set_xlabel("Jam")
         ax2.set_ylabel("Jumlah Pertanyaan")
         prettify_ax(ax2)
@@ -563,7 +476,7 @@ with tab_global:
 
     colC, colD = st.columns(2)
 
-    # ---- Pie Waktu Respon
+    # Pie Waktu Respon
     with colC:
         st.markdown("<div class='card'><h3>Rata-rata Waktu Respon per Konselor</h3>", unsafe_allow_html=True)
 
@@ -575,29 +488,30 @@ with tab_global:
         else:
             mean_resp = df_resp.groupby("Konselor")["Waktu Respon"].mean().sort_values(ascending=False)
 
-            fig3, ax3 = plt.subplots(figsize=(7, 6.3))
-            wedges, texts, autotexts = ax3.pie(
-                mean_resp.values,
-                autopct="%1.1f%%",
-                startangle=90,
-                pctdistance=0.72,
-                wedgeprops={"linewidth": 1, "edgecolor": "white"},
-            )
-            style_pie_autotexts(autotexts)
-            ax3.axis("equal")
-
-            ax3.legend(
-                wedges, mean_resp.index,
-                loc="upper center", bbox_to_anchor=(0.5, -0.05),
-                ncol=2, frameon=False
-            )
-
-            st.pyplot(fig3, use_container_width=True)
-            plt.close(fig3)
+            if mean_resp.sum() <= 0:
+                st.warning("Nilai pie chart tidak valid (semua nol).")
+            else:
+                fig3, ax3 = plt.subplots(figsize=(7, 6.0))
+                wedges, texts, autotexts = ax3.pie(
+                    mean_resp.values,
+                    autopct="%1.1f%%",
+                    startangle=90,
+                    pctdistance=0.72,
+                    wedgeprops={"linewidth": 1, "edgecolor": "white"},
+                )
+                style_pie_autotexts(autotexts)
+                ax3.axis("equal")
+                ax3.legend(
+                    wedges, mean_resp.index,
+                    loc="upper center", bbox_to_anchor=(0.5, -0.05),
+                    ncol=2, frameon=False
+                )
+                st.pyplot(fig3, use_container_width=True)
+                plt.close(fig3)
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---- Pie Status
+    # Pie Status
     with colD:
         st.markdown("<div class='card'><h3>Proporsi Sesuai / Tidak Sesuai / Tidak Terjawab</h3>", unsafe_allow_html=True)
 
@@ -608,29 +522,30 @@ with tab_global:
         ]
         labels = ["Sesuai", "Tidak Sesuai", "Tidak Terjawab"]
 
-        fig4, ax4 = plt.subplots(figsize=(7, 6.3))
-        wedges, texts, autotexts = ax4.pie(
-            values,
-            autopct="%1.0f%%",
-            startangle=90,
-            pctdistance=0.72,
-            wedgeprops={"linewidth": 1, "edgecolor": "white"},
-        )
-        style_pie_autotexts(autotexts)
-        ax4.axis("equal")
-
-        ax4.legend(
-            wedges, labels,
-            loc="upper center", bbox_to_anchor=(0.5, -0.05),
-            ncol=3, frameon=False
-        )
-
-        st.pyplot(fig4, use_container_width=True)
-        plt.close(fig4)
+        if sum(values) == 0:
+            st.warning("Tidak ada data status pada filter ini.")
+        else:
+            fig4, ax4 = plt.subplots(figsize=(7, 6.0))
+            wedges, texts, autotexts = ax4.pie(
+                values,
+                autopct="%1.0f%%",
+                startangle=90,
+                pctdistance=0.72,
+                wedgeprops={"linewidth": 1, "edgecolor": "white"},
+            )
+            style_pie_autotexts(autotexts)
+            ax4.axis("equal")
+            ax4.legend(
+                wedges, labels,
+                loc="upper center", bbox_to_anchor=(0.5, -0.05),
+                ncol=3, frameon=False
+            )
+            st.pyplot(fig4, use_container_width=True)
+            plt.close(fig4)
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---- Workload
+    # Workload
     st.markdown("<div class='section-chip'>👥 Analisis Beban Kerja Konselor</div>", unsafe_allow_html=True)
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
@@ -641,7 +556,6 @@ with tab_global:
         st.warning("Tidak ada data workload pada filter ini.")
     else:
         fig_wl, ax_wl = plt.subplots(figsize=(9, 4.2))
-
         workload_sorted = workload.sort_values()
         bars = ax_wl.barh(workload_sorted.index, workload_sorted.values)
 
@@ -665,7 +579,7 @@ with tab_global:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---- Produktivitas
+    # Produktivitas
     st.markdown("<div class='section-chip'>⚙️ Analisis Produktivitas Konselor</div>", unsafe_allow_html=True)
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
@@ -691,29 +605,12 @@ with tab_global:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---- Time Series
-    st.markdown("<div class='section-chip'>📈 Tren Pertanyaan Mingguan</div>", unsafe_allow_html=True)
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-    weekly = df_global.resample("W").size()
-    if weekly.empty:
-        st.warning("Tidak ada data mingguan pada filter ini.")
-    else:
-        fig_ts, ax_ts = plt.subplots(figsize=(14, 4))
-        ax_ts.plot(weekly.index, weekly.values, marker="o", linewidth=2)
-        ax_ts.set_ylabel("Jumlah Pertanyaan")
-        prettify_ax(ax_ts)
-        st.pyplot(fig_ts, use_container_width=True)
-        plt.close(fig_ts)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
 
 # ============================================================
-# TAB 2 — DASHBOARD PERSONAL
+# HALAMAN: DASHBOARD PERSONAL
 # ============================================================
-with tab_personal:
-    st.markdown("<div class='section-chip'>Dashboard Personal (Berdasarkan Jadwal)</div>", unsafe_allow_html=True)
+elif menu == "Dashboard Personal":
+    st.markdown("<div class='section-chip'>Dashboard Personal</div>", unsafe_allow_html=True)
 
     df_personal = df[
         (df["Jadwal Seharusnya"] == konselor_jadwal) &
@@ -747,18 +644,18 @@ with tab_personal:
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        kpi_card("Jumlah Pertanyaan (jadwal ini)", f"{total_q:,}", "Pada bulan & tahun terpilih")
+        kpi_card("Jumlah Pertanyaan", f"{total_q:,}", "Pada filter personal")
     with k2:
         kpi_card("Jumlah Respon", f"{jumlah_respon:,}", f"Response rate: {rr:.1f}%")
     with k3:
         kpi_card("Tidak Terjawab", f"{tidak_terjawab:,}", "Butuh tindak lanjut")
     with k4:
-        kpi_card("Jawaban Sesuai Jadwal", f"{sesuai:,}", "Kesesuaian dari jadwal ini")
+        kpi_card("Sesuai Jadwal", f"{sesuai:,}", "Jawaban sesuai jadwal")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("<div class='card'><h3>Proporsi Kesesuaian Menjawab Berdasarkan Jadwal</h3>", unsafe_allow_html=True)
+        st.markdown("<div class='card'><h3>Proporsi Kesesuaian Menjawab (Berdasarkan Jadwal)</h3>", unsafe_allow_html=True)
 
         df_pie = df_personal[
             (df_personal["Flag Sesuai"] == 1) |
@@ -776,19 +673,22 @@ with tab_personal:
         df_pie["Penjawab"] = df_pie.apply(penjawab_valid, axis=1)
         penjawab_count = df_pie["Penjawab"].value_counts()
 
-        fig1, ax1 = plt.subplots(figsize=(7, 6.0))
-        wedges, texts, autotexts = ax1.pie(
-            penjawab_count.values,
-            labels=penjawab_count.index,
-            autopct=lambda p: f"{int(round(p/100 * penjawab_count.sum()))}",
-            startangle=90,
-            pctdistance=0.72,
-            wedgeprops={"linewidth": 1, "edgecolor": "white"},
-        )
-        style_pie_autotexts(autotexts)
-        ax1.axis("equal")
-        st.pyplot(fig1, use_container_width=True)
-        plt.close(fig1)
+        if penjawab_count.sum() == 0:
+            st.warning("Tidak ada data pie pada filter ini.")
+        else:
+            fig1, ax1 = plt.subplots(figsize=(7, 6.0))
+            wedges, texts, autotexts = ax1.pie(
+                penjawab_count.values,
+                labels=penjawab_count.index,
+                autopct=lambda p: f"{int(round(p/100 * penjawab_count.sum()))}",
+                startangle=90,
+                pctdistance=0.72,
+                wedgeprops={"linewidth": 1, "edgecolor": "white"},
+            )
+            style_pie_autotexts(autotexts)
+            ax1.axis("equal")
+            st.pyplot(fig1, use_container_width=True)
+            plt.close(fig1)
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -798,27 +698,30 @@ with tab_personal:
         labels2 = ["Sesuai", "Tidak Sesuai", "Tidak Terjawab"]
         values2 = [sesuai, tidak_sesuai, tidak_terjawab]
 
-        fig2, ax2 = plt.subplots(figsize=(7, 6.0))
-        wedges, texts, autotexts = ax2.pie(
-            values2,
-            labels=labels2,
-            autopct=lambda p: f"{int(round(p/100 * sum(values2)))}",
-            startangle=90,
-            pctdistance=0.72,
-            wedgeprops={"linewidth": 1, "edgecolor": "white"},
-        )
-        style_pie_autotexts(autotexts)
-        ax2.axis("equal")
-        st.pyplot(fig2, use_container_width=True)
-        plt.close(fig2)
+        if sum(values2) == 0:
+            st.warning("Tidak ada data status pada filter ini.")
+        else:
+            fig2, ax2 = plt.subplots(figsize=(7, 6.0))
+            wedges, texts, autotexts = ax2.pie(
+                values2,
+                labels=labels2,
+                autopct=lambda p: f"{int(round(p/100 * sum(values2)))}",
+                startangle=90,
+                pctdistance=0.72,
+                wedgeprops={"linewidth": 1, "edgecolor": "white"},
+            )
+            style_pie_autotexts(autotexts)
+            ax2.axis("equal")
+            st.pyplot(fig2, use_container_width=True)
+            plt.close(fig2)
 
         st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ============================================================
-# TAB 3 — TIME SERIES
+# HALAMAN: TIME SERIES
 # ============================================================
-with tab_ts:
+elif menu == "Time Series Mingguan":
     st.markdown("<div class='section-chip'>Time Series Mingguan</div>", unsafe_allow_html=True)
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
@@ -838,9 +741,9 @@ with tab_ts:
 
 
 # ============================================================
-# TAB 4 — CHANGE POINT
+# HALAMAN: CHANGE POINT
 # ============================================================
-with tab_cp:
+elif menu == "Change Point Detection":
     st.markdown("<div class='section-chip'>Change Point Detection</div>", unsafe_allow_html=True)
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
@@ -856,7 +759,7 @@ with tab_cp:
         else:
             variance = np.var(signal)
             penalty = 1.0 * np.log(n) * variance
-            st.caption(f"Penalty otomatis digunakan: {penalty:.2f}")
+            st.caption(f"Penalty otomatis: {penalty:.2f}")
 
             algo = rpt.Pelt(model="l2", min_size=4).fit(signal)
             cp = algo.predict(pen=penalty)
@@ -876,7 +779,6 @@ with tab_cp:
             ax_cp.set_ylabel("Jumlah Pertanyaan")
             ax_cp.legend()
             prettify_ax(ax_cp)
-
             st.pyplot(fig_cp, use_container_width=True)
             plt.close(fig_cp)
 
@@ -903,15 +805,15 @@ with tab_cp:
             if len(df_segments) >= 2 and df_segments.loc[0, "Rata-rata / minggu"] != 0:
                 delta = df_segments.loc[1, "Rata-rata / minggu"] - df_segments.loc[0, "Rata-rata / minggu"]
                 pct = (delta / df_segments.loc[0, "Rata-rata / minggu"]) * 100
-                st.info(f"Terjadi perubahan rata-rata beban layanan sebesar {pct:.1f}% dari segmen 1 ke segmen 2.")
+                st.info(f"Perubahan rata-rata beban layanan: {pct:.1f}% dari segmen 1 ke segmen 2.")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ============================================================
-# TAB 5 — STATISTIK
+# HALAMAN: STATISTIK
 # ============================================================
-with tab_stat:
+elif menu == "Analisis Statistik":
     st.markdown("<div class='section-chip'>Analisis Statistik</div>", unsafe_allow_html=True)
     st.markdown("<div class='card'>", unsafe_allow_html=True)
 
