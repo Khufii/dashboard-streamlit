@@ -482,45 +482,44 @@ if menu == "Dashboard Global":
     colC, colD = st.columns(2)
 
     # Pie Waktu Respon
-    with colC:
-        st.markdown("<div class='card'><h3>Rata-rata Waktu Respon per Konselor</h3>", unsafe_allow_html=True)
+   with colC:
+    st.markdown("<div class='card'><h3>Rata-rata Waktu Respon per Konselor</h3>", unsafe_allow_html=True)
 
-        df_resp = df_global.dropna(subset=["Waktu Respon"])
-        df_resp = df_resp[df_resp["Konselor"] != "Tidak Terjawab"]
+    df_resp = df_global.dropna(subset=["Waktu Respon"])
+    df_resp = df_resp[df_resp["Konselor"] != "Tidak Terjawab"]
 
-        if df_resp.empty:
-            st.warning("Tidak ada data waktu respon pada filter ini.")
+    if df_resp.empty:
+        st.warning("Tidak ada data waktu respon pada filter ini.")
+    else:
+        mean_resp = df_resp.groupby("Konselor")["Waktu Respon"].mean().sort_values(ascending=False)
+
+        if mean_resp.sum() <= 0:
+            st.warning("Nilai pie chart tidak valid (semua nol).")
         else:
-            mean_resp = df_resp.groupby("Konselor")["Waktu Respon"].mean().sort_values(ascending=False)
+            fig3, ax3 = plt.subplots(figsize=(7, 6.0))
+            wedges, texts, autotexts = ax3.pie(
+                mean_resp.values,
+                labels=None,                  # label jangan di slice (biar bersih)
+                autopct=autopct_min_pct(3.0), # persen kecil (<3%) disembunyikan
+                startangle=90,
+                pctdistance=0.68,             # angka agak masuk ke tengah
+                wedgeprops={"linewidth": 1, "edgecolor": "white"},
+            )
 
-            if mean_resp.sum() <= 0:
-                st.warning("Nilai pie chart tidak valid (semua nol).")
-            else:
-                fig3, ax3 = plt.subplots(figsize=(7, 6.0))
-                 wedges, texts, autotexts = ax3.pie(
-                    mean_resp.values,
-                    labels=None,                      # label jangan di slice (biar bersih)
-                    autopct=autopct_min_pct(3.0),     # persen kecil (<3%) disembunyikan
-                    startangle=90,
-                    pctdistance=0.68,                 # angka agak masuk ke tengah
-                    wedgeprops={"linewidth": 1, "edgecolor": "white"},
-                )
-                
-                style_pie_autotexts(autotexts)
-                ax3.axis("equal")
-                
-                # legend tetap menampilkan semua nama konselor
-                ax3.legend(
-                    wedges, mean_resp.index,
-                    loc="upper center", bbox_to_anchor=(0.5, -0.05),
-                    ncol=2, frameon=False
-                )
-                
-                st.pyplot(fig3, use_container_width=True)
-                plt.close(fig3)
+            style_pie_autotexts(autotexts)
+            ax3.axis("equal")
 
+            ax3.legend(
+                wedges, mean_resp.index,
+                loc="upper center", bbox_to_anchor=(0.5, -0.05),
+                ncol=2, frameon=False
+            )
 
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.pyplot(fig3, use_container_width=True)
+            plt.close(fig3)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
     # Pie Status
     with colD:
